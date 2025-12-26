@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chicago Jump Start Dispatch Console</title>
+  <meta name="description" content="Step-locked dispatch console for Chicago mobile jump start service. Complete the packet, then checkout." />
+  <meta name="robots" content="index,follow" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <div class="brand">DISPATCH // CHICAGO JUMP START</div>
+      <div class="status" id="statusLine">STATUS: Awaiting Packet</div>
+    </header>
+
+    <section class="card">
+      <div class="meter">
+        <div class="meter-label">DISPATCH SYNC</div>
+        <div class="meter-bar"><div class="meter-fill" id="meterFill"></div></div>
+        <div class="meter-pct" id="meterPct">0%</div>
+      </div>
+
+      <div class="steps">
+        <button class="step active" data-step="1" id="tab1">1) Confirm</button>
+        <button class="step" data-step="2" id="tab2" disabled>2) Location</button>
+        <button class="step" data-step="3" id="tab3" disabled>3) Vehicle</button>
+        <button class="step" data-step="4" id="tab4" disabled>4) Checkout</button>
+      </div>
+
+      <div class="panel" id="panel"></div>
+    </section>
+
+    <footer class="foot">
+      <div class="tiny">
+        Jump start assistance only. No towing. No repairs. Customer responsible for vehicle condition + safe access.
+      </div>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
