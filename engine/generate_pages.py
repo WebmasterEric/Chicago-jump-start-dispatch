@@ -2,11 +2,11 @@ import json, os, random, re, datetime
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
-ENGINE = os.path.join(ROOT, "engine")
 
 KEYWORDS_FILE = os.path.join(DATA, "keywords.json")
 MEMORY_FILE = os.path.join(DATA, "memory.json")
 
+SITE_URL = "https://webmastereric.github.io/Chicago-jump-start-dispatch"
 DISPATCH_URL = "https://webmastereric.github.io/Chicago-jump-start-dispatch/"
 WOO_URL = "https://store.webmastereric.com/product/chicago-mobile-jump-start/"
 
@@ -25,7 +25,6 @@ def foundation_page(spokes):
     links = "\n".join(
         [f'<li><a href="{s}">{s.replace("-", " ").replace(".html","").title()}</a></li>' for s in spokes]
     )
-
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -65,7 +64,6 @@ def foundation_page(spokes):
 def spoke_page(keyword):
     title = f"{keyword.title()} — Chicago Jump Start ($75)"
     slug = slugify(keyword) + ".html"
-
     html = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -103,6 +101,27 @@ def spoke_page(keyword):
 """
     return slug, html
 
+def write_sitemap(urls):
+    today = datetime.date.today().isoformat()
+    items = []
+    for u in urls:
+        items.append(f"""  <url>
+    <loc>{u}</loc>
+    <lastmod>{today}</lastmod>
+  </url>""")
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{chr(10).join(items)}
+</urlset>
+"""
+
+def write_robots():
+    return f"""User-agent: *
+Allow: /
+
+Sitemap: {SITE_URL}/sitemap.xml
+"""
+
 def main():
     kw = load_json(KEYWORDS_FILE)["keywords"]
     mem = load_json(MEMORY_FILE)
@@ -119,14 +138,24 @@ def main():
         f.write(html)
 
     mem["used"].append(keyword)
-    mem["total_pages"] += 1
+    mem["total_pages"] = int(mem.get("total_pages", 0)) + 1
     save_json(MEMORY_FILE, mem)
 
     spokes = sorted([f for f in os.listdir(ROOT) if f.endswith(".html") and f != "index.html"])
     with open(os.path.join(ROOT, "index.html"), "w", encoding="utf-8") as f:
         f.write(foundation_page(spokes))
 
+    # sitemap + robots
+    all_pages = ["index.html"] + spokes
+    urls = [f"{SITE_URL}/{p}" for p in all_pages]
+    with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
+        f.write(write_sitemap(urls))
+
+    with open(os.path.join(ROOT, "robots.txt"), "w", encoding="utf-8") as f:
+        f.write(write_robots())
+
     print(f"Generated: {slug}")
+    print("Updated: index.html, sitemap.xml, robots.txt")
 
 if __name__ == "__main__":
     main()
