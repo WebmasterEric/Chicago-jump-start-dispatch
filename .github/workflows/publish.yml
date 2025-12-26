@@ -1,0 +1,46 @@
+name: Daily SEO Publisher
+
+on:
+  schedule:
+    # Runs daily at 7:10 AM Chicago time (CST = UTC-6 in winter)
+    # 07:10 CST == 13:10 UTC
+    - cron: "10 13 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-seo-publisher
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run generator
+        run: |
+          python engine/generate_pages.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "seo-bot"
+          git config user.email "seo-bot@users.noreply.github.com"
+
+          # Only commit if there are changes
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "Daily publish: new SEO page"
+            git push
+          else
+            echo "No changes to commit."
+          fi
