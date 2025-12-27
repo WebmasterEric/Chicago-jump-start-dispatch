@@ -1,12 +1,4 @@
-/* app.js */
-/* =========================================================
-   V2 DISPATCH CONSOLE
-   - Tap-only, one question at a time
-   - Big progress (bar + 5 dots)
-   - Checkout shown ONLY after Step 5
-   - Resources rendered from RESOURCES array (no placeholders)
-   ========================================================= */
-
+/* app.js (V2.2) */
 (() => {
   const CONFIG = {
     checkoutUrl: "https://store.webmastereric.com/product/chicago-mobile-jump-start/",
@@ -15,7 +7,7 @@
     priceLabel: "$75"
   };
 
-  // ✅ Add spokes here (latest = last item)
+  // ✅ Spokes (keep original file names; title/desc are optional)
   const RESOURCES = [
     {
       href: "dead-battery-help-chicago.html",
@@ -55,14 +47,14 @@
 
   const backToDispatch = document.getElementById("backToDispatch");
   const resourceGrid = document.getElementById("resourceGrid");
-  const latestCard = document.getElementById("latestCard");
-  const latestTitle = document.getElementById("latestTitle");
-  const latestDesc = document.getElementById("latestDesc");
   const lastUpdated = document.getElementById("lastUpdated");
+
+  // NEW: last 3 file links container
+  const fileLinks = document.getElementById("fileLinks");
 
   checkoutBtn.href = CONFIG.checkoutUrl;
 
-  // Flow
+  // Flow state
   const S = {
     step: 1,
     answers: { inChicago:null, vehicle:null, symptom:null, towing:null, safe:null }
@@ -231,27 +223,43 @@
       badge.classList.add("bad");
       resultTitle.textContent = "Not a match based on your answers.";
       resultBody.textContent = `${v.reason} Use Resources to confirm next steps.`;
-      // Hide checkout if not qualified (per spec)
       checkoutBtn.style.display = "none";
     }
     updateProgressUI();
   }
 
+  // Resources: cards + separate last-3 filename links (plain)
   function renderResources(){
     resourceGrid.innerHTML = "";
+    if (fileLinks) fileLinks.innerHTML = "";
 
-    if (!RESOURCES.length){
-      latestTitle.textContent = "Latest Resource";
-      latestDesc.textContent = "Add a spoke in app.js (RESOURCES array).";
-      latestCard.href = "#resources";
+    if (!RESOURCES || RESOURCES.length === 0){
+      if (fileLinks){
+        fileLinks.textContent = "No files yet.";
+      }
       return;
     }
 
-    const latest = RESOURCES[RESOURCES.length - 1];
-    latestTitle.textContent = latest.title || "Latest Resource";
-    latestDesc.textContent = latest.desc || "Newest resource added to this hub.";
-    latestCard.href = latest.href;
+    // last 3 (max)
+    const last3 = RESOURCES.slice(-3).reverse();
+    if (fileLinks){
+      last3.forEach((r, idx) => {
+        const a = document.createElement("a");
+        a.href = r.href;
+        a.textContent = r.href; // keep original filename
+        a.style.display = "inline-block";
+        a.style.marginRight = "12px";
+        a.style.marginTop = "8px";
+        a.style.color = "rgba(90,169,255,.95)";
+        a.style.fontWeight = "900";
+        a.style.fontSize = "12px";
+        a.style.textDecoration = "none";
+        a.setAttribute("aria-label", `Open ${r.href}`);
+        fileLinks.appendChild(a);
+      });
+    }
 
+    // cards (use title/desc if present; filenames remain in separate links above)
     RESOURCES.forEach((r) => {
       const a = document.createElement("a");
       a.className = "glassCardLink";
@@ -272,6 +280,7 @@
       a.appendChild(t);
       a.appendChild(d);
       a.appendChild(m);
+
       resourceGrid.appendChild(a);
     });
   }
