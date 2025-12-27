@@ -1,348 +1,181 @@
 /* ============================================================
-   CHICAGO JUMP START — DISPATCH CONSOLE
-   3-step gated flow + FIXED address typing stall
-   - Debounced suggestions (optional)
-   - Aborts in-flight fetch requests
-   - Manual address always allowed
-   - Saves state in localStorage
+   CHICAGO MOBILE JUMP START — HIGH-CONVERTING HUB (MVP)
+   - Checkout is primary (dispatch trigger)
+   - SMS is optional (single tap) to 773-808-4447
+   - Vets basic fit: Chicago? vehicle? symptom? towing? safe?
+   - References spokes as "Resources"
    ============================================================ */
 
 (() => {
-  const CFG = {
-    storageKey: "cjs_dispatch_v2",
+  const CONFIG = {
+    city: "Chicago, IL",
+    vehicles: "Cars • SUVs • Trucks",
+    price: "$75",
+    scopeLine: "Jump start only • No towing • No repairs",
+
+    // Primary CTA:
     checkoutUrl: "https://store.webmastereric.com/product/chicago-mobile-jump-start/",
-    enableSuggestions: true,
-    suggestDebounceMs: 450,
-    suggestMinChars: 5,
-    cityBias: "Chicago, IL"
+
+    // Optional SMS:
+    smsPhoneDigits: "17738084447" // +1 773-808-4447
   };
 
-  const $ = (id) => document.getElementById(id);
+  const chatBody = document.getElementById("chatBody");
+  const chatMeta = document.getElementById("chatMeta");
+  const quickRow = document.getElementById("quickRow");
+  const actionRow = document.getElementById("actionRow");
+  const checkoutBtn = document.getElementById("checkoutBtn");
+  const sendRequestBtn = document.getElementById("sendRequestBtn");
+  const restartBtn = document.getElementById("restartBtn");
 
-  // Steps
-  const step1 = $("step1");
-  const step2 = $("step2");
-  const step3 = $("step3");
+  checkoutBtn.href = CONFIG.checkoutUrl;
 
-  // Chips
-  const chip1 = $("chip1");
-  const chip2 = $("chip2");
-  const chip3 = $("chip3");
-
-  // Buttons
-  const next1 = $("next1");
-  const next2 = $("next2");
-  const resetBtn = $("reset");
-  const back1 = $("back1");
-  const back2 = $("back2");
-  const clearLocation = $("clearLocation");
-
-  // Inputs
-  const nameEl = $("name");
-  const phoneEl = $("phone");
-  const addressEl = $("address");
-  const notesEl = $("notes");
-
-  // Location UI
-  const suggestionsEl = $("address_suggestions");
-  const statusEl = $("location_status");
-
-  // Review + checkout
-  const reviewEl = $("review");
-  const checkoutBtn = $("checkoutBtn");
-
-  // Required guards
-  const required = [step1, step2, step3, next1, next2, resetBtn, back1, back2, nameEl, phoneEl, addressEl, reviewEl, checkoutBtn];
-  if (required.some((x) => !x)) {
-    console.error("Missing required elements. Check your index.html IDs match app.js.");
-    return;
-  }
-
-  checkoutBtn.href = CFG.checkoutUrl;
-
-  // -------------------------
-  // State
-  // -------------------------
-  const DEFAULT = {
-    step: 1,
-    name: "",
-    phone: "",
-    address: "",
-    notes: "",
-    lat: null,
-    lon: null,
-    addressLocked: false,
-    updatedAt: null
+  const S = {
+    answers: {
+      inChicago: null,
+      vehicleType: null,
+      symptom: null,
+      safeToWait: null,
+      towingNeeded: null
+    }
   };
 
-  let state = loadState();
-
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(CFG.storageKey);
-      if (!raw) return { ...DEFAULT };
-      const parsed = JSON.parse(raw);
-      return { ...DEFAULT, ...parsed };
-    } catch {
-      return { ...DEFAULT };
-    }
+  function addBubble(text, who = "bot") {
+    const d = document.createElement("div");
+    d.className = `bubble ${who}`;
+    d.textContent = text;
+    chatBody.appendChild(d);
+    chatBody.scrollTop = chatBody.scrollHeight;
   }
 
-  function saveState() {
-    state.updatedAt = new Date().toISOString();
-    localStorage.setItem(CFG.storageKey, JSON.stringify(state));
+  function setMeta(text) {
+    chatMeta.textContent = text;
   }
 
-  function setStep(n) {
-    state.step = n;
-    saveState();
-    render();
+  function clearQuick() {
+    quickRow.innerHTML = "";
   }
 
-  function resetAll() {
-    state = { ...DEFAULT };
-    saveState();
-    render();
-    clearSuggestionsUI();
-    setStatus("");
-  }
+  function showQuick(buttons) {
+    clearQuick();
+    actionRow.style.display = "none";
 
-  // -------------------------
-  // Render
-  // -------------------------
-  function render() {
-    // values
-    nameEl.value = state.name || "";
-    phoneEl.value = state.phone || "";
-    addressEl.value = state.address || "";
-    notesEl.value = state.notes || "";
-
-    // visibility
-    step1.style.display = state.step === 1 ? "block" : "none";
-    step2.style.display = state.step === 2 ? "block" : "none";
-    step3.style.display = state.step === 3 ? "block" : "none";
-
-    // chips
-    [chip1, chip2, chip3].forEach((c) => c.classList.remove("active"));
-    if (state.step === 1) chip1.classList.add("active");
-    if (state.step === 2) chip2.classList.add("active");
-    if (state.step === 3) chip3.classList.add("active");
-
-    // review
-    reviewEl.innerHTML = `
-      <div style="font-weight:900;margin-bottom:8px;">Request Summary</div>
-      <div><strong>Name:</strong> ${esc(state.name || "-")}</div>
-      <div><strong>Phone:</strong> ${esc(state.phone || "-")}</div>
-      <div><strong>Location:</strong> ${esc(state.address || "-")}</div>
-      <div><strong>Notes:</strong> ${esc(state.notes || "-")}</div>
-      <div style="margin-top:10px;color:rgba(233,238,248,.56);font-size:12px;">
-        ${state.lat && state.lon ? `Geo locked: ${esc(state.lat)}, ${esc(state.lon)}` : "Geo: not set (manual entry is OK)"}
-      </div>
-    `;
-
-    if (state.addressLocked && state.lat && state.lon) {
-      setStatus("Location locked.");
-    }
-  }
-
-  function esc(s) {
-    return String(s).replace(/[&<>"']/g, (m) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
-    }[m]));
-  }
-
-  // -------------------------
-  // Validation
-  // -------------------------
-  function validateStep1() {
-    const name = nameEl.value.trim();
-    const phone = phoneEl.value.trim();
-    if (name.length < 2) return "Enter your name.";
-
-    const digits = phone.replace(/\D/g, "");
-    if (digits.length < 10) return "Enter a valid phone number.";
-    return null;
-  }
-
-  function validateStep2() {
-    const address = addressEl.value.trim();
-    if (address.length < 6) return "Enter the address or nearest cross streets.";
-    return null;
-  }
-
-  // -------------------------
-  // Events (Step 1)
-  // -------------------------
-  nameEl.addEventListener("input", () => { state.name = nameEl.value; saveState(); });
-  phoneEl.addEventListener("input", () => { state.phone = phoneEl.value; saveState(); });
-
-  next1.addEventListener("click", () => {
-    const err = validateStep1();
-    if (err) return alert(err);
-    state.name = nameEl.value.trim();
-    state.phone = phoneEl.value.trim();
-    saveState();
-    setStep(2);
-  });
-
-  // -------------------------
-  // Step 2 Address — FIXED
-  // -------------------------
-  let geoAbort = null;
-
-  function abortGeo() {
-    if (geoAbort) { geoAbort.abort(); geoAbort = null; }
-  }
-
-  function debounce(fn, wait = 450) {
-    let t;
-    return (...args) => {
-      clearTimeout(t);
-      t = setTimeout(() => fn(...args), wait);
-    };
-  }
-
-  function setStatus(msg) {
-    statusEl.textContent = msg || "";
-  }
-
-  function clearSuggestionsUI() {
-    if (suggestionsEl) suggestionsEl.innerHTML = "";
-  }
-
-  function resetLocationLock() {
-    state.addressLocked = false;
-    state.lat = null;
-    state.lon = null;
-    saveState();
-  }
-
-  addressEl.addEventListener("input", () => {
-    state.address = addressEl.value;
-    resetLocationLock();
-    saveState();
-  });
-
-  const runSuggest = debounce(async () => {
-    if (!CFG.enableSuggestions) return;
-    if (!suggestionsEl) return;
-
-    const q0 = addressEl.value.trim();
-    if (q0.length < CFG.suggestMinChars) {
-      clearSuggestionsUI();
-      setStatus("");
-      return;
-    }
-
-    abortGeo();
-    geoAbort = new AbortController();
-
-    setStatus("Searching…");
-    clearSuggestionsUI();
-
-    // Nominatim (free). This is optional. Manual entry always works.
-    const q = `${q0}, ${CFG.cityBias}`;
-    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(q)}`;
-
-    try {
-      const res = await fetch(url, {
-        signal: geoAbort.signal,
-        headers: { "Accept": "application/json" }
-      });
-
-      if (!res.ok) throw new Error(`Geocode failed: ${res.status}`);
-      const data = await res.json();
-
-      if (!Array.isArray(data) || data.length === 0) {
-        setStatus("No matches. Manual entry is OK — continue.");
-        return;
-      }
-
-      setStatus("Select a match (optional) or continue with manual entry.");
-
-      suggestionsEl.innerHTML = data.map((r) => {
-        const label = (r.display_name || "").replace(/\s+\d{5}(-\d{4})?$/, "");
-        const short = label.split(",").slice(0, 3).join(",").trim();
-        return `
-          <button type="button" class="sug"
-            data-lat="${esc(r.lat)}"
-            data-lon="${esc(r.lon)}"
-            data-label="${esc(label)}">
-            ${esc(short)}
-            <small>${esc(label)}</small>
-          </button>
-        `;
-      }).join("");
-
-    } catch (e) {
-      if (e.name === "AbortError") return;
-      console.warn("Geocode error:", e);
-      setStatus("Lookup busy. Manual entry is OK — continue.");
-      clearSuggestionsUI();
-    }
-  }, CFG.suggestDebounceMs);
-
-  addressEl.addEventListener("input", runSuggest);
-
-  if (suggestionsEl) {
-    suggestionsEl.addEventListener("click", (e) => {
-      const btn = e.target.closest("button.sug");
-      if (!btn) return;
-
-      const label = btn.getAttribute("data-label") || "";
-      const lat = btn.getAttribute("data-lat");
-      const lon = btn.getAttribute("data-lon");
-
-      addressEl.value = label;
-      state.address = label;
-      state.lat = lat;
-      state.lon = lon;
-      state.addressLocked = true;
-      saveState();
-
-      clearSuggestionsUI();
-      setStatus("Location locked.");
+    buttons.forEach((b) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "qbtn" + (b.danger ? " danger" : "");
+      btn.textContent = b.label;
+      btn.addEventListener("click", () => b.onClick());
+      quickRow.appendChild(btn);
     });
   }
 
-  notesEl.addEventListener("input", () => {
-    state.notes = notesEl.value;
-    saveState();
-  });
+  function qualifyVerdict() {
+    const a = S.answers;
+    if (a.inChicago === "No") return { ok: false, reason: "Chicago-only service." };
+    if (a.towingNeeded === "Yes") return { ok: false, reason: "This is jump start only — towing is not included." };
+    if (a.safeToWait === "No") return { ok: false, reason: "If you’re not safe to wait, prioritize safety first." };
+    return { ok: true, reason: "Qualified for a jump start dispatch." };
+  }
 
-  clearLocation.addEventListener("click", () => {
-    addressEl.value = "";
-    state.address = "";
-    resetLocationLock();
-    clearSuggestionsUI();
-    setStatus("");
-    saveState();
-    addressEl.focus();
-  });
+  function buildPrefillSMS() {
+    const a = S.answers;
+    const msg = [
+      "CHICAGO JUMP START — REQUEST",
+      `City: ${CONFIG.city}`,
+      `Vehicle: ${a.vehicleType ?? "-"}`,
+      `Symptom: ${a.symptom ?? "-"}`,
+      `Safe to wait: ${a.safeToWait ?? "-"}`,
+      `Towing needed: ${a.towingNeeded ?? "-"}`,
+      "",
+      "I’m proceeding to checkout now."
+    ].join("\n");
 
-  next2.addEventListener("click", () => {
-    const err = validateStep2();
-    if (err) return alert(err);
+    return `sms:${CONFIG.smsPhoneDigits}?&body=${encodeURIComponent(msg)}`;
+  }
 
-    state.address = addressEl.value.trim();
-    state.notes = notesEl.value.trim();
-    saveState();
+  function showFinalActions(qualified) {
+    clearQuick();
+    actionRow.style.display = "flex";
+    sendRequestBtn.href = buildPrefillSMS();
 
-    setStep(3);
-  });
+    if (qualified) {
+      setMeta("Qualified • Checkout to dispatch");
+      addBubble("✅ You’re in the right place for a Chicago mobile jump start.", "bot");
+      addBubble("Proceed to checkout to trigger dispatch. Optional: text the request summary if you want.", "bot");
+      addBubble("If you’re diagnosing, scroll to Resources below.", "bot");
+    } else {
+      setMeta("Not qualified");
+      addBubble("This request doesn’t match the jump start scope based on your answers.", "bot");
+      addBubble("You can restart, or use Resources below to confirm what’s going on.", "bot");
+    }
+  }
 
-  back1.addEventListener("click", () => setStep(1));
-  back2.addEventListener("click", () => setStep(2));
+  function start() {
+    // reset
+    chatBody.innerHTML = "";
+    setMeta("Ready");
+    S.answers = { inChicago: null, vehicleType: null, symptom: null, safeToWait: null, towingNeeded: null };
 
-  // Reset
-  resetBtn.addEventListener("click", () => {
-    if (confirm("Reset dispatch form?")) resetAll();
-  });
+    addBubble(`Welcome. This is the authoritative hub for Chicago mobile jump starts (${CONFIG.vehicles}).`, "bot");
+    addBubble(`Flat ${CONFIG.price}. Same-day possible. ${CONFIG.scopeLine}.`, "bot");
+    addBubble("Quick check — answer a few questions and you’ll get routed.", "bot");
 
-  // Init
-  render();
+    setTimeout(() => {
+      addBubble("Are you currently in Chicago?", "bot");
+      showQuick([
+        { label: "Yes", onClick: () => { addBubble("Yes", "user"); S.answers.inChicago = "Yes"; qVehicle(); } },
+        { label: "No", danger: true, onClick: () => { addBubble("No", "user"); S.answers.inChicago = "No"; finish(); } }
+      ]);
+    }, 250);
+  }
+
+  function qVehicle() {
+    setMeta("Vehicle check");
+    addBubble("What are you driving?", "bot");
+    showQuick([
+      { label: "Car", onClick: () => { addBubble("Car", "user"); S.answers.vehicleType = "Car"; qSymptom(); } },
+      { label: "SUV", onClick: () => { addBubble("SUV", "user"); S.answers.vehicleType = "SUV"; qSymptom(); } },
+      { label: "Truck", onClick: () => { addBubble("Truck", "user"); S.answers.vehicleType = "Truck"; qSymptom(); } }
+    ]);
+  }
+
+  function qSymptom() {
+    setMeta("Symptom check");
+    addBubble("What happens when you try to start it?", "bot");
+    showQuick([
+      { label: "Clicks / no crank", onClick: () => { addBubble("Clicks / no crank", "user"); S.answers.symptom = "Clicks / no crank"; qTow(); } },
+      { label: "No lights / dead", onClick: () => { addBubble("No lights / dead", "user"); S.answers.symptom = "No lights / dead"; qTow(); } },
+      { label: "Starts then dies", onClick: () => { addBubble("Starts then dies", "user"); S.answers.symptom = "Starts then dies"; qTow(); } },
+      { label: "Not sure", onClick: () => { addBubble("Not sure", "user"); S.answers.symptom = "Not sure"; qTow(); } }
+    ]);
+  }
+
+  function qTow() {
+    setMeta("Scope check");
+    addBubble("Do you need towing?", "bot");
+    showQuick([
+      { label: "No (jump start only)", onClick: () => { addBubble("No (jump start only)", "user"); S.answers.towingNeeded = "No"; qSafe(); } },
+      { label: "Yes", danger: true, onClick: () => { addBubble("Yes", "user"); S.answers.towingNeeded = "Yes"; qSafe(); } }
+    ]);
+  }
+
+  function qSafe() {
+    setMeta("Safety check");
+    addBubble("Are you in a safe place to wait?", "bot");
+    showQuick([
+      { label: "Yes", onClick: () => { addBubble("Yes", "user"); S.answers.safeToWait = "Yes"; finish(); } },
+      { label: "No", danger: true, onClick: () => { addBubble("No", "user"); S.answers.safeToWait = "No"; finish(); } }
+    ]);
+  }
+
+  function finish() {
+    const verdict = qualifyVerdict();
+    showFinalActions(verdict.ok);
+
+    restartBtn.onclick = () => start();
+  }
+
+  // init
+  start();
 })();
