@@ -1,66 +1,68 @@
+/* app.js */
+/* =========================================================
+   V2 DISPATCH CONSOLE
+   - Tap-only, one question at a time
+   - Big progress (bar + 5 dots)
+   - Checkout shown ONLY after Step 5
+   - Resources rendered from RESOURCES array (no placeholders)
+   ========================================================= */
+
 (() => {
   const CONFIG = {
-    city: "Chicago, IL",
-    vehicles: "Cars • SUVs • Trucks",
-    price: "$75",
     checkoutUrl: "https://store.webmastereric.com/product/chicago-mobile-jump-start/",
-    smsPhoneDigits: "17738084447"
+    smsPhoneDigits: "17738084447",
+    cityLabel: "Chicago, IL",
+    priceLabel: "$75"
   };
 
-  // ✅ Edit this list whenever you add more spokes
-  // "latest" is always the LAST item in this array.
+  // ✅ Add spokes here (latest = last item)
   const RESOURCES = [
     {
       href: "dead-battery-help-chicago.html",
       title: "Dead Battery Help (Chicago)",
-      desc: "Quick confirmation signs a jump start will solve it — and what it won’t solve."
+      desc: "Fast signs a jump start will solve it — and what it won’t solve."
     },
     {
       href: "winter-car-battery-chicago.html",
       title: "Winter Car Battery (Chicago)",
-      desc: "Cold weather drain in Chicago: what’s normal, what’s not, and when to dispatch."
+      desc: "Cold-weather battery drain in Chicago: what to expect and when to dispatch."
     }
   ];
 
   // DOM
-  const jumpToConsole = document.getElementById("jumpToConsole");
-  const jumpToResources = document.getElementById("jumpToResources");
-  const backToConsole = document.getElementById("backToConsole");
-  const toggleResources = document.getElementById("toggleResources");
+  const goDispatch = document.getElementById("goDispatch");
+  const goResources = document.getElementById("goResources");
 
-  const metaPill = document.getElementById("metaPill");
-  const resetBtn = document.getElementById("resetBtn");
+  const resetBtn = document.getElementById("reset");
 
   const progressFill = document.getElementById("progressFill");
-  const stepsWrap = document.getElementById("steps");
+  const dotSteps = Array.from(document.querySelectorAll(".dotStep"));
 
-  const qaLabel = document.getElementById("qaLabel");
-  const qaQuestion = document.getElementById("qaQuestion");
-  const qaHint = document.getElementById("qaHint");
-  const choices = document.getElementById("choices");
-  const answerLine = document.getElementById("answerLine");
-  const miniResourcesBtn = document.getElementById("miniResourcesBtn");
+  const stepText = document.getElementById("stepText");
+  const questionEl = document.getElementById("question");
+  const hintEl = document.getElementById("hint");
+  const choicesEl = document.getElementById("choices");
+  const savedLine = document.getElementById("savedLine");
+  const jumpResources = document.getElementById("jumpResources");
 
   const result = document.getElementById("result");
-  const resultBadge = document.getElementById("resultBadge");
+  const badge = document.getElementById("badge");
   const resultTitle = document.getElementById("resultTitle");
   const resultBody = document.getElementById("resultBody");
   const checkoutBtn = document.getElementById("checkoutBtn");
   const smsBtn = document.getElementById("smsBtn");
-  const resourceBtn = document.getElementById("resourceBtn");
+  const viewResourcesBtn = document.getElementById("viewResourcesBtn");
 
-  const resources = document.getElementById("resources");
-  const latestWrap = document.getElementById("latestWrap");
-  const latestCard = document.getElementById("latestCard");
-  const latestName = document.getElementById("latestName");
-  const latestDesc = document.getElementById("latestDesc");
+  const backToDispatch = document.getElementById("backToDispatch");
   const resourceGrid = document.getElementById("resourceGrid");
-
-  const lastUpdatedEl = document.getElementById("lastUpdated");
+  const latestCard = document.getElementById("latestCard");
+  const latestTitle = document.getElementById("latestTitle");
+  const latestDesc = document.getElementById("latestDesc");
+  const lastUpdated = document.getElementById("lastUpdated");
 
   checkoutBtn.href = CONFIG.checkoutUrl;
 
-  // State
+  // Flow
   const S = {
     step: 1,
     answers: { inChicago:null, vehicle:null, symptom:null, towing:null, safe:null }
@@ -73,14 +75,21 @@
       question: "Are you currently in Chicago?",
       hint: "Chicago-only dispatch hub.",
       key: "inChicago",
-      options: [{ text: "Yes", value: "Yes" }, { text: "No", value: "No", danger: true }]
+      options: [
+        { text: "Yes", value: "Yes" },
+        { text: "No", value: "No", danger: true }
+      ]
     },
     {
       label: "Step 2 of 5",
       question: "What are you driving?",
-      hint: "Cars • SUVs • Trucks.",
+      hint: "Cars • SUVs • trucks.",
       key: "vehicle",
-      options: [{ text: "Car", value: "Car" }, { text: "SUV", value: "SUV" }, { text: "Truck", value: "Truck" }]
+      options: [
+        { text: "Car", value: "Car" },
+        { text: "SUV", value: "SUV" },
+        { text: "Truck", value: "Truck" }
+      ]
     },
     {
       label: "Step 3 of 5",
@@ -99,44 +108,48 @@
       question: "Do you need towing?",
       hint: "Jump start only (no towing, no repairs).",
       key: "towing",
-      options: [{ text: "No (jump start only)", value: "No" }, { text: "Yes", value: "Yes", danger: true }]
+      options: [
+        { text: "No (jump start only)", value: "No" },
+        { text: "Yes", value: "Yes", danger: true }
+      ]
     },
     {
       label: "Step 5 of 5",
       question: "Are you in a safe place to wait?",
       hint: "If not safe, prioritize safety first.",
       key: "safe",
-      options: [{ text: "Yes", value: "Yes" }, { text: "No", value: "No", danger: true }]
+      options: [
+        { text: "Yes", value: "Yes" },
+        { text: "No", value: "No", danger: true }
+      ]
     }
   ];
 
-  // Utils
-  function scrollToEl(el){ el.scrollIntoView({ behavior:"smooth", block:"start" }); }
-  function setMeta(t){ metaPill.textContent = t; }
-  function clearChoices(){ choices.innerHTML = ""; }
+  function scrollToId(id){
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
 
-  function progressPct() {
+  function pct(){
     const completed = Math.max(0, Math.min(S.step - 1, 5));
     return Math.round((completed / 5) * 100);
   }
 
-  function renderSteps() {
-    const btns = stepsWrap.querySelectorAll(".step");
-    btns.forEach((b) => {
-      const s = parseInt(b.getAttribute("data-step"), 10);
-      b.classList.remove("active","done","locked");
+  function updateProgressUI(){
+    progressFill.style.width = pct() + "%";
 
-      if (s < S.step) { b.classList.add("done"); b.style.cursor = "pointer"; }
-      else if (s === S.step) { b.classList.add("active"); b.style.cursor = "default"; }
-      else { b.classList.add("locked"); b.style.cursor = "not-allowed"; }
-
-      b.onclick = () => { if (s < S.step && s <= 5) showStep(s, true); };
+    dotSteps.forEach((node) => {
+      const n = parseInt(node.getAttribute("data-dot"), 10);
+      node.classList.remove("active","done");
+      if (n < S.step) node.classList.add("done");
+      else if (n === S.step) node.classList.add("active");
     });
 
-    progressFill.style.width = progressPct() + "%";
+    const bar = document.querySelector(".progressBar");
+    if (bar) bar.setAttribute("aria-valuenow", String(Math.max(0, Math.min(S.step - 1, 5))));
   }
 
-  function summary() {
+  function summary(){
     const a = S.answers;
     const parts = [];
     if (a.inChicago) parts.push(`City: ${a.inChicago}`);
@@ -147,119 +160,113 @@
     return parts.length ? `Saved: ${parts.join(" • ")}` : "Saved: —";
   }
 
-  function setAnswer(key, value) {
+  function setAnswer(key, value){
     S.answers[key] = value;
-    answerLine.textContent = summary();
+    savedLine.textContent = summary();
   }
 
-  function qualifyVerdict() {
+  function verdict(){
     const a = S.answers;
     if (a.inChicago === "No") return { ok:false, reason:"Chicago-only service." };
     if (a.towing === "Yes") return { ok:false, reason:"Jump start only — towing not included." };
     if (a.safe === "No") return { ok:false, reason:"If you’re not safe to wait, prioritize safety first." };
-    return { ok:true, reason:"Qualified for jump start dispatch." };
+    return { ok:true, reason:"Qualified for dispatch." };
   }
 
-  function buildSMSLink() {
+  function buildSMSLink(){
     const a = S.answers;
     const msg = [
       "CHICAGO JUMP START — REQUEST",
-      `City: ${CONFIG.city}`,
+      `City: ${CONFIG.cityLabel}`,
       `Vehicle: ${a.vehicle || "-"}`,
       `Symptom: ${a.symptom || "-"}`,
       `Towing: ${a.towing || "-"}`,
       `Safe to wait: ${a.safe || "-"}`,
       "",
-      "Proceeding to checkout now."
+      `Checkout: ${CONFIG.checkoutUrl}`
     ].join("\n");
     return `sms:${CONFIG.smsPhoneDigits}?&body=${encodeURIComponent(msg)}`;
   }
 
-  function showResult() {
-    const verdict = qualifyVerdict();
-    result.style.display = "block";
-    smsBtn.href = buildSMSLink();
-
-    if (verdict.ok) {
-      resultBadge.textContent = "Qualified";
-      resultBadge.classList.remove("bad");
-      resultTitle.textContent = "Dispatch unlocked.";
-      resultBody.textContent =
-        `Your answers match a standard Chicago mobile jump start request for ${CONFIG.vehicles}. ` +
-        `Checkout is the dispatch trigger (collects location + contact). Optional SMS sends a summary.`;
-      setMeta("Unlocked • Checkout to dispatch");
-    } else {
-      resultBadge.textContent = "Not qualified";
-      resultBadge.classList.add("bad");
-      resultTitle.textContent = "Not a match based on your answers.";
-      resultBody.textContent =
-        `${verdict.reason} Use Resources below to confirm symptoms or restart.`;
-      setMeta("Not qualified • Use resources");
-    }
-
-    S.step = 6;
-    renderSteps();
-  }
-
-  function showStep(stepNum, review=false) {
+  function showStep(stepNum){
     S.step = stepNum;
-    renderSteps();
-    result.style.display = "none";
+    updateProgressUI();
+    result.hidden = true;
 
     const q = FLOW[stepNum];
-    qaLabel.textContent = q.label + (review ? " (review)" : "");
-    qaQuestion.textContent = q.question;
-    qaHint.textContent = q.hint;
+    stepText.textContent = q.label;
+    questionEl.textContent = q.question;
+    hintEl.textContent = q.hint;
 
-    clearChoices();
+    choicesEl.innerHTML = "";
     q.options.forEach((opt) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "choiceBtn" + (opt.danger ? " danger" : "");
-      btn.textContent = opt.text;
-      btn.onclick = () => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "choiceBtn" + (opt.danger ? " danger" : "");
+      b.textContent = opt.text;
+      b.onclick = () => {
         setAnswer(q.key, opt.value);
         if (stepNum < 5) showStep(stepNum + 1);
         else showResult();
-        setMeta(progressPct() === 0 ? "Locked • Step 1" : `Progress: ${progressPct()}%`);
       };
-      choices.appendChild(btn);
+      choicesEl.appendChild(b);
     });
-
-    setMeta(progressPct() === 0 ? "Locked • Step 1" : `Progress: ${progressPct()}%`);
   }
 
-  // Resources rendering (real CTAs)
-  function renderResources() {
+  function showResult(){
+    const v = verdict();
+    result.hidden = false;
+    smsBtn.href = buildSMSLink();
+
+    if (v.ok){
+      badge.textContent = "Qualified";
+      badge.classList.remove("bad");
+      resultTitle.textContent = "Dispatch unlocked.";
+      resultBody.textContent =
+        `Your answers match a standard Chicago mobile jump start request. ` +
+        `Proceed to checkout (${CONFIG.priceLabel}) to trigger dispatch.`;
+      checkoutBtn.style.display = "inline-flex";
+    } else {
+      badge.textContent = "Not qualified";
+      badge.classList.add("bad");
+      resultTitle.textContent = "Not a match based on your answers.";
+      resultBody.textContent = `${v.reason} Use Resources to confirm next steps.`;
+      // Hide checkout if not qualified (per spec)
+      checkoutBtn.style.display = "none";
+    }
+    updateProgressUI();
+  }
+
+  function renderResources(){
     resourceGrid.innerHTML = "";
 
-    if (!RESOURCES.length) {
-      latestName.textContent = "No resources yet";
-      latestDesc.textContent = "Add a spoke to the RESOURCES list in app.js.";
+    if (!RESOURCES.length){
+      latestTitle.textContent = "Latest Resource";
+      latestDesc.textContent = "Add a spoke in app.js (RESOURCES array).";
       latestCard.href = "#resources";
       return;
     }
 
     const latest = RESOURCES[RESOURCES.length - 1];
-    latestName.textContent = latest.title || latest.href;
+    latestTitle.textContent = latest.title || "Latest Resource";
     latestDesc.textContent = latest.desc || "Newest resource added to this hub.";
     latestCard.href = latest.href;
 
     RESOURCES.forEach((r) => {
       const a = document.createElement("a");
-      a.className = "resourceCard";
+      a.className = "glassCardLink";
       a.href = r.href;
 
       const t = document.createElement("div");
-      t.className = "resourceTitle";
+      t.className = "cardTitle";
       t.textContent = r.title || r.href;
 
       const d = document.createElement("div");
-      d.className = "resourceDesc";
+      d.className = "cardDesc";
       d.textContent = r.desc || "Open this resource to confirm symptoms and next steps.";
 
       const m = document.createElement("div");
-      m.className = "resourceMeta";
+      m.className = "cardMeta";
       m.textContent = "Open resource →";
 
       a.appendChild(t);
@@ -269,46 +276,30 @@
     });
   }
 
-  // Collapse resources
-  let resourcesCollapsed = false;
-  function setResourcesCollapsed(v) {
-    resourcesCollapsed = v;
-    const show = !v;
-    latestWrap.style.display = show ? "block" : "none";
-    resourceGrid.style.display = show ? "grid" : "none";
-    toggleResources.textContent = v ? "Expand" : "Collapse";
-  }
-
-  // Last updated (simple + reliable, no build step)
-  function setLastUpdated() {
+  function setLastUpdated(){
     const d = new Date();
-    lastUpdatedEl.textContent = d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
+    lastUpdated.textContent = d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
   }
 
-  // Bindings
-  jumpToConsole.onclick = () => scrollToEl(document.getElementById("console"));
-  jumpToResources.onclick = () => scrollToEl(resources);
-  backToConsole.onclick = () => scrollToEl(document.getElementById("console"));
-  miniResourcesBtn.onclick = () => scrollToEl(resources);
-  resourceBtn.onclick = () => scrollToEl(resources);
-
-  resetBtn.onclick = () => resetAll();
-  toggleResources.onclick = () => setResourcesCollapsed(!resourcesCollapsed);
-
-  function resetAll() {
+  function resetAll(){
     S.step = 1;
     S.answers = { inChicago:null, vehicle:null, symptom:null, towing:null, safe:null };
-    answerLine.textContent = "Saved: —";
-    result.style.display = "none";
-    setMeta("Locked • Step 1");
+    savedLine.textContent = "Saved: —";
     showStep(1);
-    scrollToEl(document.getElementById("console"));
+    scrollToId("dispatch");
   }
 
+  // Bind
+  goDispatch.onclick = () => scrollToId("dispatch");
+  goResources.onclick = () => scrollToId("resources");
+  jumpResources.onclick = () => scrollToId("resources");
+  backToDispatch.onclick = () => scrollToId("dispatch");
+  viewResourcesBtn.onclick = () => scrollToId("resources");
+  resetBtn.onclick = resetAll;
+
   // Init
-  answerLine.textContent = "Saved: —";
+  savedLine.textContent = "Saved: —";
   renderResources();
   setLastUpdated();
-  setResourcesCollapsed(false);
   showStep(1);
 })();
