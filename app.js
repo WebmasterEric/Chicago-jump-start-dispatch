@@ -1,4 +1,4 @@
-/* app.js (V2.2) */
+/* app.js (V2.3 — no Resources rendering, only scroll + dispatch flow) */
 (() => {
   const CONFIG = {
     checkoutUrl: "https://store.webmastereric.com/product/chicago-mobile-jump-start/",
@@ -7,23 +7,11 @@
     priceLabel: "$75"
   };
 
-  // ✅ Spokes (keep original file names; title/desc are optional)
-  const RESOURCES = [
-    {
-      href: "dead-battery-help-chicago.html",
-      title: "Dead Battery Help (Chicago)",
-      desc: "Fast signs a jump start will solve it — and what it won’t solve."
-    },
-    {
-      href: "winter-car-battery-chicago.html",
-      title: "Winter Car Battery (Chicago)",
-      desc: "Cold-weather battery drain in Chicago: what to expect and when to dispatch."
-    }
-  ];
-
   // DOM
   const goDispatch = document.getElementById("goDispatch");
   const goResources = document.getElementById("goResources");
+  const jumpResources = document.getElementById("jumpResources");
+  const backToDispatch = document.getElementById("backToDispatch");
 
   const resetBtn = document.getElementById("reset");
 
@@ -35,7 +23,6 @@
   const hintEl = document.getElementById("hint");
   const choicesEl = document.getElementById("choices");
   const savedLine = document.getElementById("savedLine");
-  const jumpResources = document.getElementById("jumpResources");
 
   const result = document.getElementById("result");
   const badge = document.getElementById("badge");
@@ -45,16 +32,11 @@
   const smsBtn = document.getElementById("smsBtn");
   const viewResourcesBtn = document.getElementById("viewResourcesBtn");
 
-  const backToDispatch = document.getElementById("backToDispatch");
-  const resourceGrid = document.getElementById("resourceGrid");
   const lastUpdated = document.getElementById("lastUpdated");
-
-  // NEW: last 3 file links container
-  const fileLinks = document.getElementById("fileLinks");
 
   checkoutBtn.href = CONFIG.checkoutUrl;
 
-  // Flow state
+  // State
   const S = {
     step: 1,
     answers: { inChicago:null, vehicle:null, symptom:null, towing:null, safe:null }
@@ -117,9 +99,17 @@
     }
   ];
 
-  function scrollToId(id){
+  // Guaranteed jump (no render dependency)
+  function jumpTo(id){
+    // 1) set hash (works even if smooth scroll fails)
+    location.hash = "#" + id;
+
+    // 2) also smooth scroll after layout
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior:"smooth", block:"start" });
+    });
   }
 
   function pct(){
@@ -228,66 +218,10 @@
     updateProgressUI();
   }
 
-  // Resources: cards + separate last-3 filename links (plain)
-  function renderResources(){
-    resourceGrid.innerHTML = "";
-    if (fileLinks) fileLinks.innerHTML = "";
-
-    if (!RESOURCES || RESOURCES.length === 0){
-      if (fileLinks){
-        fileLinks.textContent = "No files yet.";
-      }
-      return;
-    }
-
-    // last 3 (max)
-    const last3 = RESOURCES.slice(-3).reverse();
-    if (fileLinks){
-      last3.forEach((r, idx) => {
-        const a = document.createElement("a");
-        a.href = r.href;
-        a.textContent = r.href; // keep original filename
-        a.style.display = "inline-block";
-        a.style.marginRight = "12px";
-        a.style.marginTop = "8px";
-        a.style.color = "rgba(90,169,255,.95)";
-        a.style.fontWeight = "900";
-        a.style.fontSize = "12px";
-        a.style.textDecoration = "none";
-        a.setAttribute("aria-label", `Open ${r.href}`);
-        fileLinks.appendChild(a);
-      });
-    }
-
-    // cards (use title/desc if present; filenames remain in separate links above)
-    RESOURCES.forEach((r) => {
-      const a = document.createElement("a");
-      a.className = "glassCardLink";
-      a.href = r.href;
-
-      const t = document.createElement("div");
-      t.className = "cardTitle";
-      t.textContent = r.title || r.href;
-
-      const d = document.createElement("div");
-      d.className = "cardDesc";
-      d.textContent = r.desc || "Open this resource to confirm symptoms and next steps.";
-
-      const m = document.createElement("div");
-      m.className = "cardMeta";
-      m.textContent = "Open resource →";
-
-      a.appendChild(t);
-      a.appendChild(d);
-      a.appendChild(m);
-
-      resourceGrid.appendChild(a);
-    });
-  }
-
   function setLastUpdated(){
     const d = new Date();
-    lastUpdated.textContent = d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
+    if (lastUpdated) lastUpdated.textContent =
+      d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
   }
 
   function resetAll(){
@@ -295,20 +229,19 @@
     S.answers = { inChicago:null, vehicle:null, symptom:null, towing:null, safe:null };
     savedLine.textContent = "Saved: —";
     showStep(1);
-    scrollToId("dispatch");
+    jumpTo("dispatch");
   }
 
   // Bind
-  goDispatch.onclick = () => scrollToId("dispatch");
-  goResources.onclick = () => scrollToId("resources");
-  jumpResources.onclick = () => scrollToId("resources");
-  backToDispatch.onclick = () => scrollToId("dispatch");
-  viewResourcesBtn.onclick = () => scrollToId("resources");
+  goDispatch.onclick = () => jumpTo("dispatch");
+  goResources.onclick = () => jumpTo("resources");
+  jumpResources.onclick = () => jumpTo("resources");
+  backToDispatch.onclick = () => jumpTo("dispatch");
+  viewResourcesBtn.onclick = () => jumpTo("resources");
   resetBtn.onclick = resetAll;
 
   // Init
   savedLine.textContent = "Saved: —";
-  renderResources();
   setLastUpdated();
   showStep(1);
 })();
