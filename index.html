@@ -1,198 +1,176 @@
+<!-- index.html -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 
   <title>Chicago Mobile Jump Start — $75 Dispatch Console (Cars • SUVs • Trucks)</title>
-  <meta name="description" content="Chicago mobile jump start for cars, SUVs, and trucks. Flat $75. Same-day possible. Use the dispatch console to confirm fit and proceed to checkout. Resources included."/>
+  <meta name="description" content="Chicago mobile jump start for cars, SUVs, and trucks. Flat $75. Use the dispatch console to unlock checkout and trigger dispatch. Resources included."/>
   <meta name="robots" content="index,follow"/>
 
   <link rel="stylesheet" href="styles.css"/>
 </head>
 
 <body>
-  <header class="top">
-    <div class="brand">
-      <span class="dot"></span>
-      <span class="brandText">Chicago Mobile Jump Start</span>
+  <header class="topbar" aria-label="Site header">
+    <div class="topbar__left">
+      <span class="statusDot" aria-hidden="true"></span>
+      <span class="brand">Chicago Mobile Jump Start</span>
     </div>
 
-    <div class="pill">
-      <span class="dot"></span>
-      <span>Dispatch Console • Checkout Triggers Dispatch</span>
+    <div class="topbar__right">
+      <span class="chip chip--muted">Dispatch Console</span>
     </div>
   </header>
 
   <main class="wrap">
-    <!-- HERO -->
-    <section class="hero" aria-label="Chicago mobile jump start hub">
-      <div class="heroMain">
-        <h1>Chicago Mobile Jump Start (Cars • SUVs • Trucks)</h1>
+    <!-- HERO (minimal, not clutter) -->
+    <section class="hero" aria-label="Service summary">
+      <div class="glass heroCard">
+        <h1 class="h1">Chicago Mobile Jump Start</h1>
         <p class="sub">
-          Flat <strong>$75</strong> mobile jump start in <strong>Chicago, IL</strong>.
-          Same-day possible, sometimes within the hour depending on availability.
-          Use the console below to confirm fit fast, then dispatch via checkout.
+          Flat <strong>$75</strong> jump start for <strong>cars • SUVs • trucks</strong> in <strong>Chicago, IL</strong>.
+          Jump start only — <strong>no towing</strong>, <strong>no repairs</strong>.
         </p>
 
-        <div class="badges">
-          <span class="badge">Chicago, IL</span>
-          <span class="badge">Cars / SUVs / Trucks</span>
-          <span class="badge">$75 Flat</span>
-          <span class="badge">Jump start only</span>
-          <span class="badge">No towing</span>
-          <span class="badge">No repairs</span>
+        <div class="pillRow" aria-label="Service highlights">
+          <span class="pill">Chicago</span>
+          <span class="pill">$75 Flat</span>
+          <span class="pill">Cars/SUVs/Trucks</span>
+          <span class="pill">Jump start only</span>
         </div>
 
-        <div class="heroCtas">
-          <button class="btn primary" id="jumpToConsole" type="button">Start Dispatch Flow</button>
-          <button class="btn ghost" id="jumpToResources" type="button">View Resources</button>
+        <div class="heroActions">
+          <button class="btn btn--primary" id="goDispatch" type="button">Start Dispatch</button>
+          <button class="btn btn--ghost" id="goResources" type="button">View Resources</button>
         </div>
 
-        <div class="heroNote">
-          Checkout collects your contact + location details and is the dispatch trigger.
-        </div>
+        <p class="micro">
+          Checkout is the dispatch trigger. This console qualifies fast (tap-only).
+        </p>
       </div>
-
-      <aside class="heroSide" aria-label="Service scope">
-        <div class="scopeCard">
-          <div class="scopeTitle">Scope</div>
-          <div class="scopeRow">
-            <div class="k">Covered</div>
-            <div class="v">Dead/weak battery jump start</div>
-          </div>
-          <div class="scopeRow">
-            <div class="k">Not covered</div>
-            <div class="v">Towing • mechanical repair • alternator replacement</div>
-          </div>
-          <div class="scopeRow">
-            <div class="k">Best use</div>
-            <div class="v">Clicks/no crank • no lights • battery drain</div>
-          </div>
-        </div>
-      </aside>
     </section>
 
-    <!-- CONSOLE -->
-    <section class="console" id="console" aria-label="Dispatch console">
-      <div class="consoleTop">
-        <div class="consoleTitle">
-          <span class="chip">DISPATCH</span>
-          <span class="titleText">Step-by-step Verification</span>
+    <!-- DISPATCH CONSOLE -->
+    <section class="console" id="dispatch" aria-label="Dispatch console">
+      <div class="glass consoleCard">
+        <div class="consoleTop">
+          <div>
+            <div class="kicker">DISPATCH</div>
+            <div class="title">Unlock Dispatch in 5 taps</div>
+          </div>
+          <button class="miniBtn" id="reset" type="button" aria-label="Reset dispatch flow">Reset</button>
         </div>
 
-        <div class="consoleTools">
-          <span class="metaPill" id="metaPill">Locked • Step 1</span>
-          <button class="metaBtn" id="resetBtn" type="button">Reset</button>
-        </div>
-      </div>
+        <!-- big, readable progress -->
+        <div class="progressWrap" aria-label="Progress">
+          <div class="progressBar" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
+            <div class="progressFill" id="progressFill"></div>
+          </div>
 
-      <div class="progressWrap" aria-label="Progress">
-        <div class="progressLine">
-          <div class="progressFill" id="progressFill"></div>
-        </div>
-
-        <div class="steps" id="steps">
-          <button class="step locked" data-step="1" type="button"><span class="n">1</span><span class="t">City</span></button>
-          <button class="step locked" data-step="2" type="button"><span class="n">2</span><span class="t">Vehicle</span></button>
-          <button class="step locked" data-step="3" type="button"><span class="n">3</span><span class="t">Symptom</span></button>
-          <button class="step locked" data-step="4" type="button"><span class="n">4</span><span class="t">Scope</span></button>
-          <button class="step locked" data-step="5" type="button"><span class="n">5</span><span class="t">Safety</span></button>
-          <button class="step locked" data-step="6" type="button"><span class="n">✓</span><span class="t">Unlock</span></button>
-        </div>
-      </div>
-
-      <div class="qa">
-        <div class="qaLeft">
-          <div class="qaLabel" id="qaLabel">Step 1 of 5</div>
-          <div class="qaQuestion" id="qaQuestion">Are you currently in Chicago?</div>
-          <div class="qaHint" id="qaHint">Chicago-only dispatch hub.</div>
-
-          <div class="saved" id="answerLine"></div>
-        </div>
-
-        <div class="qaRight">
-          <div class="choices" id="choices"></div>
-
-          <div class="miniHelp">
-            Unsure? Jump to <button class="linkBtn" id="miniResourcesBtn" type="button">Resources</button>.
+          <div class="progressDots" aria-label="Steps">
+            <div class="dotStep" data-dot="1"><span class="dot"></span><span class="dotLabel">City</span></div>
+            <div class="dotStep" data-dot="2"><span class="dot"></span><span class="dotLabel">Vehicle</span></div>
+            <div class="dotStep" data-dot="3"><span class="dot"></span><span class="dotLabel">Symptom</span></div>
+            <div class="dotStep" data-dot="4"><span class="dot"></span><span class="dotLabel">Scope</span></div>
+            <div class="dotStep" data-dot="5"><span class="dot"></span><span class="dotLabel">Safety</span></div>
           </div>
         </div>
-      </div>
 
-      <!-- RESULTS -->
-      <div class="result" id="result" style="display:none;">
-        <div class="resultTop">
-          <div class="resultBadge" id="resultBadge">Qualified</div>
-          <div class="resultTitle" id="resultTitle">Dispatch unlocked.</div>
+        <!-- question card -->
+        <div class="qa">
+          <div class="qaTop">
+            <div class="stepText" id="stepText">Step 1 of 5</div>
+            <div class="question" id="question">Are you currently in Chicago?</div>
+            <div class="hint" id="hint">Chicago-only dispatch hub.</div>
+          </div>
+
+          <div class="choices" id="choices" aria-label="Answer choices"></div>
+
+          <div class="savedLine" id="savedLine" aria-label="Saved summary">
+            Saved: —
+          </div>
+
+          <div class="consoleLinks">
+            <button class="linkBtn" id="jumpResources" type="button">Not sure? Read Resources</button>
+          </div>
         </div>
 
-        <div class="resultBody" id="resultBody"></div>
+        <!-- result panel -->
+        <div class="result" id="result" hidden>
+          <div class="resultHeader">
+            <span class="badge" id="badge">Qualified</span>
+            <span class="resultTitle" id="resultTitle">Dispatch unlocked.</span>
+          </div>
 
-        <div class="resultActions">
-          <a class="btn primary" id="checkoutBtn"
-             href="https://store.webmastereric.com/product/chicago-mobile-jump-start/">
-            Proceed to Checkout ($75) →
-          </a>
+          <p class="resultBody" id="resultBody"></p>
 
-          <a class="btn ghost" id="smsBtn" href="#">
-            Optional: Text Summary →
-          </a>
+          <div class="resultActions" id="resultActions">
+            <a class="btn btn--primary btn--full" id="checkoutBtn"
+               href="https://store.webmastereric.com/product/chicago-mobile-jump-start/">
+              Checkout ($75) — Dispatch →
+            </a>
+            <a class="btn btn--ghost btn--full" id="smsBtn" href="#">
+              Optional: Text Summary →
+            </a>
+            <button class="btn btn--ghost btn--full" id="viewResourcesBtn" type="button">
+              View Resources →
+            </button>
+          </div>
 
-          <button class="btn ghost" id="resourceBtn" type="button">View Resources</button>
-        </div>
-
-        <div class="fine">
-          Checkout is the dispatch trigger. SMS is optional.
+          <p class="micro">
+            Checkout collects your location + contact details. SMS is optional.
+          </p>
         </div>
       </div>
     </section>
 
     <!-- RESOURCES -->
     <section class="resources" id="resources" aria-label="Resources">
-      <div class="resourcesTop">
-        <div>
-          <h2>Resources (Common No-Start Scenarios)</h2>
-          <p class="mini">
-            Read • confirm • then dispatch.
-            If you already know it’s the battery, checkout is the fastest route.
-          </p>
+      <div class="glass resourcesCard">
+        <div class="resourcesTop">
+          <div>
+            <div class="kicker">RESOURCES</div>
+            <div class="title">Read • confirm • then dispatch</div>
+            <p class="micro">
+              Quick self-check pages for common no-start scenarios. Latest is highlighted first.
+            </p>
+          </div>
+
+          <button class="miniBtn" id="backToDispatch" type="button">Back</button>
         </div>
 
-        <div class="resourcesTools">
-          <button class="btn ghost" id="backToConsole" type="button">Back to Dispatch</button>
-          <button class="btn ghost" id="toggleResources" type="button">Collapse</button>
+        <!-- Latest resource -->
+        <a class="glassCardLink latest" id="latestCard" href="#">
+          <div class="cardTitle" id="latestTitle">Latest Resource</div>
+          <div class="cardDesc" id="latestDesc">Loading…</div>
+          <div class="cardMeta">Open latest →</div>
+        </a>
+
+        <!-- grid of resource cards -->
+        <div class="resourceGrid" id="resourceGrid" aria-label="Resource cards"></div>
+
+        <div class="resourcesFoot">
+          <a class="btn btn--primary btn--full" href="https://store.webmastereric.com/product/chicago-mobile-jump-start/">
+            Checkout ($75) — Dispatch →
+          </a>
+
+          <div class="mutedLine">
+            Last updated: <span id="lastUpdated"></span>
+          </div>
         </div>
-      </div>
 
-      <!-- LATEST -->
-      <div class="latestWrap" id="latestWrap" aria-label="Latest resource">
-        <div class="latestTitle">Latest Resource</div>
-        <a class="latestCard" id="latestCard" href="#">
-          <div class="latestName" id="latestName">Loading…</div>
-          <div class="latestDesc" id="latestDesc">Newest resource added to this hub.</div>
-          <div class="latestMeta">Open latest →</div>
-        </a>
-      </div>
-
-      <!-- GRID (real CTAs will be injected by app.js from RESOURCES list) -->
-      <div class="resourceGrid" id="resourceGrid"></div>
-
-      <div class="resourcesFoot">
-        <a class="btn primary" href="https://store.webmastereric.com/product/chicago-mobile-jump-start/">
-          Checkout ($75) →
-        </a>
-        <span class="mini2">Last updated: <span id="lastUpdated"></span></span>
-      </div>
-
-      <div class="addNote">
-        To add more spokes later: open <strong>app.js</strong> and add a new item to the <strong>RESOURCES</strong> list.
+        <div class="note">
+          Add more spokes later by editing the <strong>RESOURCES</strong> array in <strong>app.js</strong>.
+        </div>
       </div>
     </section>
 
-    <footer class="foot">
-      <span><strong>Model:</strong> Resources earn impressions. Dispatch console converts.</span>
-      <span class="muted">Keep it stable; let indexing compound.</span>
+    <footer class="footer" aria-label="Footer">
+      <div class="mutedLine">
+        Hub intent: authoritative Chicago mobile jump start info + dispatch routing.
+      </div>
     </footer>
   </main>
 
