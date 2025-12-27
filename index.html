@@ -4,8 +4,8 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
 
-  <title>Chicago Mobile Jump Start — $75 Battery Boost (Cars • SUVs • Trucks)</title>
-  <meta name="description" content="Chicago mobile jump start for cars, SUVs, and trucks. Flat $75. Same-day possible, sometimes within the hour based on availability. Dispatch via checkout + resources."/>
+  <title>Chicago Mobile Jump Start — $75 Dispatch Console (Cars • SUVs • Trucks)</title>
+  <meta name="description" content="Chicago mobile jump start for cars, SUVs, and trucks. Flat $75. Same-day possible. Use the dispatch console to confirm fit and proceed to checkout. Resources included."/>
   <meta name="robots" content="index,follow"/>
 
   <link rel="stylesheet" href="styles.css"/>
@@ -20,121 +20,179 @@
 
     <div class="pill">
       <span class="dot"></span>
-      <span>Authoritative Hub • Dispatch via Checkout</span>
+      <span>Dispatch Console • Checkout Triggers Dispatch</span>
     </div>
   </header>
 
   <main class="wrap">
-    <section class="console" aria-label="Chicago mobile jump start hub">
-      <div class="consoleHead">
+    <!-- HERO -->
+    <section class="hero" aria-label="Chicago mobile jump start hub">
+      <div class="heroMain">
         <h1>Chicago Mobile Jump Start (Cars • SUVs • Trucks)</h1>
-
         <p class="sub">
           Flat <strong>$75</strong> mobile jump start in <strong>Chicago, IL</strong>.
           Same-day possible, sometimes within the hour depending on availability.
-          This page is built to confirm fit fast, then route you to dispatch.
+          Use the console below to confirm fit fast, then dispatch via checkout.
         </p>
 
-        <div class="badges" aria-label="Key facts">
+        <div class="badges">
           <span class="badge">Chicago, IL</span>
           <span class="badge">Cars / SUVs / Trucks</span>
-          <span class="badge">Flat $75</span>
+          <span class="badge">$75 Flat</span>
           <span class="badge">Jump start only</span>
           <span class="badge">No towing</span>
           <span class="badge">No repairs</span>
         </div>
+
+        <div class="heroCtas">
+          <button class="btn primary" id="jumpToConsole" type="button">Start Dispatch Flow</button>
+          <button class="btn ghost" id="jumpToResources" type="button">View Resources</button>
+        </div>
+
+        <div class="heroNote">
+          Checkout collects your contact + location details and is the dispatch trigger.
+        </div>
       </div>
 
-      <!-- Authoritative scope -->
-      <section class="panel infoPanel" aria-label="Service scope">
-        <div class="panelTitle">What This Service Covers</div>
-
-        <div class="scopeGrid">
-          <div class="scopeItem">
+      <aside class="heroSide" aria-label="Service scope">
+        <div class="scopeCard">
+          <div class="scopeTitle">Scope</div>
+          <div class="scopeRow">
             <div class="k">Covered</div>
-            <div class="v">Dead battery / weak battery jump start</div>
+            <div class="v">Dead/weak battery jump start</div>
           </div>
-          <div class="scopeItem">
-            <div class="k">Vehicle Types</div>
-            <div class="v">Cars • SUVs • Trucks</div>
+          <div class="scopeRow">
+            <div class="k">Not covered</div>
+            <div class="v">Towing • mechanical repair • alternator replacement</div>
           </div>
-          <div class="scopeItem">
-            <div class="k">Not Covered</div>
-            <div class="v">Towing • mechanical repairs • alternator replacement</div>
-          </div>
-          <div class="scopeItem">
-            <div class="k">Dispatch Trigger</div>
-            <div class="v">Checkout (collects contact + location)</div>
+          <div class="scopeRow">
+            <div class="k">Best use</div>
+            <div class="v">Clicks/no crank • no lights • battery drain</div>
           </div>
         </div>
+      </aside>
+    </section>
 
-        <p class="fine">
-          If you’re unsure whether a jump start will solve it, scroll to <strong>Resources</strong> below.
-          If you’re stranded and safe to wait, checkout is the fastest path.
-        </p>
-      </section>
-
-      <!-- Virtual Assistant -->
-      <section class="chatPanel" aria-label="Virtual assistant dispatch">
-        <div class="chatTop">
-          <div class="chatTitle">Virtual Assistant</div>
-          <div class="chatMeta" id="chatMeta">Ready</div>
+    <!-- CONSOLE -->
+    <section class="console" id="console" aria-label="Dispatch console">
+      <div class="consoleTop">
+        <div class="consoleTitle">
+          <span class="chip">DISPATCH</span>
+          <span class="titleText">Step-by-step Verification</span>
         </div>
 
-        <div class="chatBody" id="chatBody" aria-live="polite"></div>
+        <div class="consoleTools">
+          <span class="metaPill" id="metaPill">Locked • Step 1</span>
+          <button class="metaBtn" id="resetBtn" type="button">Reset</button>
+        </div>
+      </div>
 
-        <div class="chatControls">
-          <div class="quickRow" id="quickRow"></div>
+      <div class="progressWrap" aria-label="Progress">
+        <div class="progressLine">
+          <div class="progressFill" id="progressFill"></div>
+        </div>
 
-          <div class="actionRow" id="actionRow" style="display:none;">
-            <!-- PRIMARY: checkout -->
-            <a class="btn primary" id="checkoutBtn"
-               href="https://store.webmastereric.com/product/chicago-mobile-jump-start/">
-              Proceed to Checkout ($75) →
-            </a>
+        <div class="steps" id="steps">
+          <button class="step locked" data-step="1" type="button"><span class="n">1</span><span class="t">City</span></button>
+          <button class="step locked" data-step="2" type="button"><span class="n">2</span><span class="t">Vehicle</span></button>
+          <button class="step locked" data-step="3" type="button"><span class="n">3</span><span class="t">Symptom</span></button>
+          <button class="step locked" data-step="4" type="button"><span class="n">4</span><span class="t">Scope</span></button>
+          <button class="step locked" data-step="5" type="button"><span class="n">5</span><span class="t">Safety</span></button>
+          <button class="step locked" data-step="6" type="button"><span class="n">✓</span><span class="t">Unlock</span></button>
+        </div>
+      </div>
 
-            <!-- OPTIONAL: sms -->
-            <a class="btn ghost" id="sendRequestBtn" href="#">
-              Optional: Text Dispatch →
-            </a>
+      <div class="qa">
+        <div class="qaLeft">
+          <div class="qaLabel" id="qaLabel">Step 1 of 5</div>
+          <div class="qaQuestion" id="qaQuestion">Are you currently in Chicago?</div>
+          <div class="qaHint" id="qaHint">Chicago-only dispatch hub.</div>
 
-            <button class="btn ghost" id="restartBtn" type="button">Restart</button>
+          <div class="saved" id="answerLine"></div>
+        </div>
+
+        <div class="qaRight">
+          <div class="choices" id="choices"></div>
+
+          <div class="miniHelp">
+            Unsure? Jump to <button class="linkBtn" id="miniResourcesBtn" type="button">Resources</button>.
           </div>
+        </div>
+      </div>
 
-          <p class="fine" id="finePrint">
-            This hub does not collect your address. Checkout collects location + contact details for dispatch.
+      <!-- RESULTS -->
+      <div class="result" id="result" style="display:none;">
+        <div class="resultTop">
+          <div class="resultBadge" id="resultBadge">Qualified</div>
+          <div class="resultTitle" id="resultTitle">Dispatch unlocked.</div>
+        </div>
+
+        <div class="resultBody" id="resultBody"></div>
+
+        <div class="resultActions">
+          <a class="btn primary" id="checkoutBtn"
+             href="https://store.webmastereric.com/product/chicago-mobile-jump-start/">
+            Proceed to Checkout ($75) →
+          </a>
+
+          <a class="btn ghost" id="smsBtn" href="#">
+            Optional: Text Summary →
+          </a>
+
+          <button class="btn ghost" id="resourceBtn" type="button">View Resources</button>
+        </div>
+
+        <div class="fine">
+          Checkout is the dispatch trigger. SMS is optional.
+        </div>
+      </div>
+    </section>
+
+    <!-- RESOURCES -->
+    <section class="resources" id="resources" aria-label="Resources">
+      <div class="resourcesTop">
+        <div>
+          <h2>Resources (Common No-Start Scenarios)</h2>
+          <p class="mini">
+            Read • confirm • then dispatch.
+            If you already know it’s the battery, checkout is the fastest route.
           </p>
         </div>
-      </section>
 
-      <!-- Resources / spokes -->
-      <section class="spokesWrap" id="resources" aria-label="Resources">
-        <div class="spokesHead">
-          <h2>Resources (Common No-Start Scenarios)</h2>
-          <div class="mini">Read • confirm • then dispatch</div>
+        <div class="resourcesTools">
+          <button class="btn ghost" id="backToConsole" type="button">Back to Dispatch</button>
+          <button class="btn ghost" id="toggleResources" type="button">Collapse</button>
         </div>
+      </div>
 
-        <div class="resourcesIntro">
-          These pages exist to quickly confirm whether a jump start is likely to solve your issue.
-          If you already know it’s the battery, checkout is the fastest route.
-        </div>
+      <!-- LATEST -->
+      <div class="latestWrap" id="latestWrap" aria-label="Latest resource">
+        <div class="latestTitle">Latest Resource</div>
+        <a class="latestCard" id="latestCard" href="#">
+          <div class="latestName" id="latestName">Loading…</div>
+          <div class="latestDesc" id="latestDesc">Newest resource added to this hub.</div>
+          <div class="latestMeta">Open latest →</div>
+        </a>
+      </div>
 
-        <div class="spokes" id="spokeList">
-          {{SPOKE_LINKS}}
-        </div>
+      <!-- GRID (real CTAs will be injected by app.js from RESOURCES list) -->
+      <div class="resourceGrid" id="resourceGrid"></div>
 
-        <div class="spokesFoot">
-          <a class="btn primary" href="https://store.webmastereric.com/product/chicago-mobile-jump-start/">
-            Checkout ($75) →
-          </a>
-          <span class="mini2" id="lastUpdated">Last updated: {{LAST_UPDATED}}</span>
-        </div>
-      </section>
+      <div class="resourcesFoot">
+        <a class="btn primary" href="https://store.webmastereric.com/product/chicago-mobile-jump-start/">
+          Checkout ($75) →
+        </a>
+        <span class="mini2">Last updated: <span id="lastUpdated"></span></span>
+      </div>
+
+      <div class="addNote">
+        To add more spokes later: open <strong>app.js</strong> and add a new item to the <strong>RESOURCES</strong> list.
+      </div>
     </section>
 
     <footer class="foot">
-      <span><strong>Hub intent:</strong> authoritative Chicago mobile jump start info + dispatch routing.</span>
-      <span class="muted">Resources help you self-diagnose; checkout triggers dispatch.</span>
+      <span><strong>Model:</strong> Resources earn impressions. Dispatch console converts.</span>
+      <span class="muted">Keep it stable; let indexing compound.</span>
     </footer>
   </main>
 
