@@ -1,172 +1,37 @@
-<!-- index.html (V2.3 — Resources = simple hyperlinks only) -->
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-
-  <title>Chicago Mobile Jump Start — $75 Dispatch Console (Cars • SUVs • Trucks)</title>
-  <meta name="description" content="Chicago mobile jump start for cars, SUVs, and trucks. Flat $75. Use the dispatch console to unlock checkout and trigger dispatch. Resources included."/>
-  <meta name="robots" content="index,follow"/>
-
-  <link rel="stylesheet" href="styles.css"/>
+<meta charset="utf-8"/>
+<title>Chicago Jump Start & Dead Car Battery Help</title>
+<meta name="description" content="Dead car battery in Chicago? Flat $75 mobile jump start. Same day service possible, sometimes within the hour. No towing, no repairs."/>
+<meta name="robots" content="index,follow"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 </head>
-
 <body>
-  <header class="topbar" aria-label="Site header">
-    <div class="topbar__left">
-      <span class="statusDot" aria-hidden="true"></span>
-      <span class="brand">Chicago Mobile Jump Start</span>
-    </div>
+<h1>Chicago Jump Start & Dead Car Battery Help</h1>
 
-    <div class="topbar__right">
-      <span class="chip chip--muted">Dispatch Console</span>
-    </div>
-  </header>
+<p>If your car won’t start in Chicago, a dead battery is one of the most common causes—especially in cold weather and street parking.</p>
 
-  <main class="wrap">
-    <!-- HERO -->
-    <section class="hero" aria-label="Service summary">
-      <div class="glass heroCard">
-        <h1 class="h1">Chicago Mobile Jump Start</h1>
-        <p class="sub">
-          Flat <strong>$75</strong> jump start for <strong>cars • SUVs • trucks</strong> in <strong>Chicago, IL</strong>.
-          Jump start only — <strong>no towing</strong>, <strong>no repairs</strong>.
-        </p>
+<h2>Same-Day Jump Start Service</h2>
+<p>Same-day service is often possible and may be completed within the hour depending on availability.</p>
 
-        <div class="pillRow" aria-label="Service highlights">
-          <span class="pill">Chicago</span>
-          <span class="pill">$75 Flat</span>
-          <span class="pill">Cars/SUVs/Trucks</span>
-          <span class="pill">Jump start only</span>
-        </div>
+<h2>Flat-Fee Pricing</h2>
+<p><strong>$75 flat</strong>. Jump start only. No towing. No repairs.</p>
 
-        <div class="heroActions">
-          <button class="btn btn--primary" id="goDispatch" type="button">Start Dispatch</button>
-          <button class="btn btn--ghost" id="goResources" type="button">View Resources</button>
-        </div>
-      </div>
-    </section>
+<h2>Get Help Now</h2>
+<ul>
+<li><a href="https://webmastereric.github.io/Chicago-jump-start-dispatch/">Open Dispatch Console</a></li>
+<li><a href="https://store.webmastereric.com/product/chicago-mobile-jump-start/">Book $75 Jump Start</a></li>
+</ul>
 
-    <!-- DISPATCH CONSOLE -->
-    <section class="console" id="dispatch" aria-label="Dispatch console">
-      <div class="glass consoleCard">
-        <div class="consoleTop">
-          <div>
-            <div class="kicker">DISPATCH</div>
-            <div class="title">Unlock Dispatch in 5 taps</div>
-          </div>
-          <button class="miniBtn" id="reset" type="button" aria-label="Reset dispatch flow">Reset</button>
-        </div>
+<h2>Related Jump Start Topics</h2>
+<ul>
+<li><a href="dead-battery-help-chicago.html">Dead Battery Help Chicago</a></li>
+<li><a href="jump-start-west-side-chicago.html">Jump Start West Side Chicago</a></li>
+<li><a href="same-day-battery-jump-chicago.html">Same Day Battery Jump Chicago</a></li>
+<li><a href="winter-car-battery-chicago.html">Winter Car Battery Chicago</a></li>
+</ul>
 
-        <div class="progressWrap" aria-label="Progress">
-          <div class="progressBar" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
-            <div class="progressFill" id="progressFill"></div>
-          </div>
-
-          <div class="progressDots" aria-label="Steps">
-            <div class="dotStep" data-dot="1"><span class="dot"></span><span class="dotLabel">City</span></div>
-            <div class="dotStep" data-dot="2"><span class="dot"></span><span class="dotLabel">Vehicle</span></div>
-            <div class="dotStep" data-dot="3"><span class="dot"></span><span class="dotLabel">Symptom</span></div>
-            <div class="dotStep" data-dot="4"><span class="dot"></span><span class="dotLabel">Scope</span></div>
-            <div class="dotStep" data-dot="5"><span class="dot"></span><span class="dotLabel">Safety</span></div>
-          </div>
-        </div>
-
-        <div class="qa">
-          <div class="qaTop">
-            <div class="stepText" id="stepText">Step 1 of 5</div>
-            <div class="question" id="question">Are you currently in Chicago?</div>
-            <div class="hint" id="hint">Chicago-only dispatch hub.</div>
-          </div>
-
-          <div class="choices" id="choices" aria-label="Answer choices"></div>
-
-          <div class="savedLine" id="savedLine" aria-label="Saved summary">
-            Saved: —
-          </div>
-
-          <div class="consoleLinks">
-            <button class="linkBtn" id="jumpResources" type="button">Not sure? Read Resources</button>
-          </div>
-        </div>
-
-        <div class="result" id="result" hidden>
-          <div class="resultHeader">
-            <span class="badge" id="badge">Qualified</span>
-            <span class="resultTitle" id="resultTitle">Dispatch unlocked.</span>
-          </div>
-
-          <p class="resultBody" id="resultBody"></p>
-
-          <div class="resultActions" id="resultActions">
-            <a class="btn btn--primary btn--full" id="checkoutBtn"
-               href="https://store.webmastereric.com/product/chicago-mobile-jump-start/">
-              Checkout ($75) — Dispatch →
-            </a>
-            <a class="btn btn--ghost btn--full" id="smsBtn" href="#">
-              Optional: Text Summary →
-            </a>
-            <button class="btn btn--ghost btn--full" id="viewResourcesBtn" type="button">
-              View Resources →
-            </button>
-          </div>
-
-          <p class="micro">
-            Checkout collects your location + contact details. SMS is optional.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- RESOURCES (simple hyperlinks only) -->
-    <section class="resources" id="resources" aria-label="Resources">
-      <div class="glass resourcesCard">
-        <div class="resourcesTop">
-          <div>
-            <div class="kicker">RESOURCES</div>
-            <div class="title">Quick self-check pages</div>
-            <p class="micro">
-              Read these to confirm whether a jump start is likely to solve it.
-            </p>
-          </div>
-
-          <button class="miniBtn" id="backToDispatch" type="button">Back</button>
-        </div>
-
-        <div class="resourceGrid" aria-label="Resource links">
-          <a class="glassCardLink" href="dead-battery-help-chicago.html">
-            <div class="cardTitle">dead-battery-help-chicago.html</div>
-            <div class="cardDesc">Symptoms + quick checks for a dead battery situation.</div>
-            <div class="cardMeta">Open resource →</div>
-          </a>
-
-          <a class="glassCardLink" href="winter-car-battery-chicago.html">
-            <div class="cardTitle">winter-car-battery-chicago.html</div>
-            <div class="cardDesc">Cold-weather battery drain in Chicago and what to expect.</div>
-            <div class="cardMeta">Open resource →</div>
-          </a>
-        </div>
-
-        <div class="resourcesFoot">
-          <a class="btn btn--primary btn--full" href="https://store.webmastereric.com/product/chicago-mobile-jump-start/">
-            Checkout ($75) — Dispatch →
-          </a>
-
-          <div class="mutedLine">
-            Last updated: <span id="lastUpdated">—</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <footer class="footer" aria-label="Footer">
-      <div class="mutedLine">
-        Hub intent: authoritative Chicago mobile jump start info + dispatch routing.
-      </div>
-    </footer>
-  </main>
-
-  <script src="app.js"></script>
+<p><em>Last updated: 2025-12-27</em></p>
 </body>
 </html>
